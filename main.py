@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel
@@ -77,9 +77,9 @@ fake_items_db = [
 ]
 
 
-@app.get("/items")
-async def list_items(skip: int = 0, limit: int = 10):
-    return fake_items_db[skip: skip + limit]
+# @app.get("/items")
+# async def list_items(skip: int = 0, limit: int = 10):
+#     return fake_items_db[skip: skip + limit]
 
 
 @app.get("/items/{item_id}")
@@ -122,3 +122,17 @@ async def create_item_with_put(item_id: int, item: Item, q: str | None = None):
     if q:
         result.update({"q" : q})
     return result
+
+
+@app.get("/items")
+async def read_items(q: list[str] = Query(...,min_length=4,max_length=10, alias="item-query")):
+    results = {"items":fake_items_db}
+    if q:
+        results.update({"q": q})
+    return results
+
+@app.get('/items_hidden')
+async def hidden_query_route(hidden_query: str = Query(None, include_in_schema=False)):
+    if hidden_query:
+        return {"hidden_query": hidden_query}
+    return {"hidden_query": "hidden_query not found"}

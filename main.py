@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query, Path, Body
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 app = FastAPI()
 
@@ -187,14 +187,35 @@ Body Multiple Parameters
 #     return results
 
 
+# class Item(BaseModel):
+#     name: str
+#     description: str = Field(None, title="The description of the item", max_length=300)
+#     price: float = Field(...,
+#                          gt=10, description='The price must be grater tan zero'
+#                          )
+#     tax: float = None
+# @app.put('/items/{item_id')
+# async def update_item(item_id: int, item: Item = Body(..., embed=True)):
+#     results = {"item_id": item_id, "item": item}
+#     return results
+
+# nested models
+
+class Image(BaseModel):
+    # url: str = Field(..., pattern='^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)$')
+    url: HttpUrl
+    name: str
+
 class Item(BaseModel):
     name: str
-    description: str = Field(None, title="The description of the item", max_length=300)
-    price: float = Field(...,
-                         gt=10, description='The price must be grater tan zero'
-                         )
-    tax: float = None
-@app.put('/items/{item_id')
-async def update_item(item_id: int, item: Item = Body(..., embed=True)):
-    results = {"item_id": item_id, "item": item}
+    description: str | None= None
+    price: float
+    tax: float | None=None
+    tags: list[str] = []
+    image: Image | None = None
+
+@app.put('/items/{item_id}')
+async def update_item(item_id: int, item: Item):
+    results = {"item_id": item_id, 'item': item}
     return results
+

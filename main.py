@@ -1,8 +1,10 @@
+from datetime import datetime, time
+
 from fastapi import FastAPI, Query, Path, Body
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
-
+from uuid import UUID
 app = FastAPI()
 
 # @app.get("/")
@@ -219,11 +221,11 @@ Body Multiple Parameters
 #     results = {"item_id": item_id, 'item': item}
 #     return results
 
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
+# class Item(BaseModel):
+#     name: str
+#     description: str | None = None
+#     price: float
+#     tax: float | None = None
 
 
 # class Item(BaseModel):
@@ -241,12 +243,21 @@ class Item(BaseModel):
 #         }
 #     }
 
+# @app.put("/items/{item_id}")
+# async def update_item(item_id: int, item: Item = Body(..., example={
+#     "name": "Foo",
+#     "description": "Description of this item",
+#     "price": 14.25,
+#     "tax": 2.25
+# })):
+#     results = {"item_id": item_id, "item": item}
+#     return results
+
+#extra data types
 @app.put("/items/{item_id}")
-async def update_item(item_id: int, item: Item = Body(..., example={
-    "name": "Foo",
-    "description": "Description of this item",
-    "price": 14.25,
-    "tax": 2.25
-})):
-    results = {"item_id": item_id, "item": item}
+async def read_items(item_id: UUID, start_date: datetime = Body(None),
+                     end_date: datetime = Body(None),
+                     repeat_at: time = Body(None)
+                     ):
+    results = {"item_id": item_id, "start_date": start_date, "end_date": end_date}
     return results

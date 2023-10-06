@@ -201,21 +201,52 @@ Body Multiple Parameters
 
 # nested models
 
-class Image(BaseModel):
-    # url: str = Field(..., pattern='^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)$')
-    url: HttpUrl
-    name: str
+# class Image(BaseModel):
+#     # url: str = Field(..., pattern='^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)$')
+#     url: HttpUrl
+#     name: str
+#
+# class Item(BaseModel):
+#     name: str
+#     description: str | None= None
+#     price: float
+#     tax: float | None=None
+#     tags: list[str] = []
+#     image: Image | None = None
+#
+# @app.put('/items/{item_id}')
+# async def update_item(item_id: int, item: Item):
+#     results = {"item_id": item_id, 'item': item}
+#     return results
 
 class Item(BaseModel):
     name: str
-    description: str | None= None
+    description: str | None = None
     price: float
-    tax: float | None=None
-    tags: list[str] = []
-    image: Image | None = None
+    tax: float | None = None
 
-@app.put('/items/{item_id}')
-async def update_item(item_id: int, item: Item):
-    results = {"item_id": item_id, 'item': item}
+
+# class Item(BaseModel):
+#     name: str = Field(..., example="Foo")
+#     description: str = Field(None, example="Description of item")
+#     price: float = Field(..., example=16.25)
+#     tax: float = Field(None, example=1.25)
+# class Config:
+#     json_schema_extra = {
+#         "example": {
+#             "name": "Foo",
+#             "description": "Description of this item",
+#             "price": 14.25,
+#             "tax": 2.25
+#         }
+#     }
+
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item: Item = Body(..., example={
+    "name": "Foo",
+    "description": "Description of this item",
+    "price": 14.25,
+    "tax": 2.25
+})):
+    results = {"item_id": item_id, "item": item}
     return results
-

@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field, HttpUrl
@@ -254,10 +254,18 @@ Body Multiple Parameters
 #     return results
 
 #extra data types
-@app.put("/items/{item_id}")
-async def read_items(item_id: UUID, start_date: datetime = Body(None),
-                     end_date: datetime = Body(None),
-                     repeat_at: time = Body(None)
+# @app.put("/items/{item_id}")
+# async def read_items(item_id: UUID, start_date: datetime = Body(None),
+#                      end_date: datetime = Body(None),
+#                      repeat_at: time = Body(None)
+#                      ):
+#     results = {"item_id": item_id, "start_date": start_date, "end_date": end_date}
+#     return results
+
+# cookie and header
+
+@app.get("/items")
+async def read_items(cookie_id: str = Cookie(None),
+                     accept_encoding: str = Header(None)
                      ):
-    results = {"item_id": item_id, "start_date": start_date, "end_date": end_date}
-    return results
+    return {"cookie_id": cookie_id, "Accept-Encoding": accept_encoding}

@@ -2,9 +2,10 @@ from datetime import datetime, time
 
 from fastapi import FastAPI, Query, Path, Body, Cookie, Header
 from enum import Enum
-from typing import Optional
-from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, Literal
+from pydantic import BaseModel, Field, HttpUrl, EmailStr
 from uuid import UUID
+
 app = FastAPI()
 
 # @app.get("/")
@@ -253,7 +254,7 @@ Body Multiple Parameters
 #     results = {"item_id": item_id, "item": item}
 #     return results
 
-#extra data types
+# extra data types
 # @app.put("/items/{item_id}")
 # async def read_items(item_id: UUID, start_date: datetime = Body(None),
 #                      end_date: datetime = Body(None),
@@ -264,8 +265,58 @@ Body Multiple Parameters
 
 # cookie and header
 
-@app.get("/items")
-async def read_items(cookie_id: str = Cookie(None),
-                     accept_encoding: str = Header(None)
-                     ):
-    return {"cookie_id": cookie_id, "Accept-Encoding": accept_encoding}
+# @app.get("/items")
+# async def read_items(cookie_id: str = Cookie(None),
+#                      accept_encoding: str = Header(None)
+#                      ):
+#     return {"cookie_id": cookie_id, "Accept-Encoding": accept_encoding}
+
+
+# response model
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float = 10.5
+    tags: list[str] = []
+
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+    "baz": {"name": "Bar", "description": None, "price": 5.2, "tax": 10.5, "tags": []}
+}
+
+
+@app.post("/items", response_model=Item)
+async def create_item(item: Item):
+    return item
+
+
+@app.get("/items/{item_id}", response_model=Item, response_model_exclude_unset=True)
+async def read_item(item_id: Literal["foo", "bar", "baz"]):
+    return items[item_id]
+
+
+@app.get("/items/{item_id}/public", response_model=Item, response_model_exclude={"tax"})
+async def read_item_public_data(item_id: Literal["foo", "bar", "baz"]):
+    return items[item_id]
+
+
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+class UserIn(UserBase):
+    password: str
+
+
+class UserOut(UserBase):
+    pass
+
+
+@app.post("/user", response_model=UserOut)
+async def create_user(user: UserIn):
+    return user
